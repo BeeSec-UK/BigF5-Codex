@@ -63,12 +63,24 @@ def decode_ipv4_address(encoded_value):
 def encode_port(port):
     if not (0 <= port <= 65535):
         raise ValueError(f"{SYMBOLS['cross']} Invalid port value. Port must be between 0 and 65535.")
+    
+    # Convert the decimal port value to the equivalent 2-byte hexadecimal value
     hex_value = format(port, '04X')
-    return int(hex_value, 16)
+    # Reverse the order of the 2 hexadecimal bytes
+    reversed_hex = hex_value[2:] + hex_value[:2]
+    # Convert the resulting 2-byte hexadecimal value to its decimal equivalent
+    decimal_value = int(reversed_hex, 16)
+    
+    return decimal_value
 
 def decode_port(encoded_value):
-    port_hex = format(encoded_value, '04X')
-    port = int(port_hex, 16)
+    # Reverse the order of the 2 hexadecimal bytes
+    hex_port = format(encoded_value, '04X')
+
+    reversed_hex = hex_port[2:] + hex_port[:2]
+
+    # Convert the reversed hex value to decimal
+    port = int(reversed_hex, 16)
     return port
 
 def main():
@@ -88,7 +100,7 @@ def main():
         if args.encode_ip and args.encode_port:
             encoded_ip = encode_ipv4_address(args.encode_ip)
             encoded_port = encode_port(args.encode_port)
-            encoded_cookie = f"{encoded_ip}.{encoded_port:04X}"
+            encoded_cookie = f"{encoded_ip}.{encoded_port}"
             print(f"{SYMBOLS['plus']} Encoded Cookie Value: {encoded_cookie}")
 
         elif args.decode_cookie:
@@ -96,14 +108,14 @@ def main():
             
             if len(cookie_parts) == 2:
                 encoded_ip = int(cookie_parts[0])
-                encoded_port = int(cookie_parts[1], 16)
+                encoded_port = int(cookie_parts[1])
                 decoded_ip = decode_ipv4_address(encoded_ip)
                 decoded_port = decode_port(encoded_port)
                 print(f"{SYMBOLS['plus']} Decoded IP: {decoded_ip}")
                 print(f"{SYMBOLS['plus']} Decoded Port: {decoded_port}")
             elif len(cookie_parts) == 3:
                 decoded_ip = decode_ipv4_address(int(cookie_parts[0]))
-                decoded_port = int(cookie_parts[1])
+                decoded_port = decode_port(int(cookie_parts[1]))
                 print(f"{SYMBOLS['plus']} Decoded IP: {decoded_ip}")
                 print(f"{SYMBOLS['plus']} Decoded Port: {decoded_port}")
             else:
